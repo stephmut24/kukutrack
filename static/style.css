@@ -1,0 +1,39 @@
+:root {
+  color: #1b1f1c;
+  background: #f6f8f3;
+  font-family: system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; }
+
+main { max-width: 680px; margin: auto; padding: 1.25rem; }
+
+header { margin: 1rem 0 1.5rem; }
+
+h1, h2, h3, h4, p { margin-top: 0; }
+h1 { font-size: 2rem; margin-bottom: .5rem; }
+h2 { margin-bottom: 1rem; }
+h4 { margin: 1.25rem 0 .5rem; }
+
+.eyebrow { color: #2d6a4f; font-weight: 700; margin-bottom: .25rem; }
+.card { background: white; border-radius: 14px; box-shadow: 0 2px 8px #1b1f1c16; padding: 1.1rem; margin: 1rem 0; }
+
+form, .reminders { display: grid; gap: .85rem; }
+label { display: grid; gap: .35rem; font-weight: 600; }
+input { font: inherit; min-height: 48px; border: 1px solid #a8b3aa; border-radius: 8px; padding: .65rem; }
+button { min-height: 52px; border: 0; border-radius: 8px; background: #2d6a4f; color: white; font: inherit; font-weight: 700; padding: .75rem; }
+button:active { background: #1e4c37; }
+
+.message { min-height: 1.25rem; color: #21603f; }
+.message.error { color: #a32626; }
+.batch h3 { margin-bottom: .35rem; }
+.reminder { grid-template-columns: 28px 1fr; align-items: center; font-weight: 400; padding: .6rem 0; border-top: 1px solid #e4e9e3; }
+.reminder input { min-height: 24px; width: 24px; }
+.completed { color: #66726a; text-decoration: line-through; }
+
+@media (min-width: 600px) {
+  form { grid-template-columns: 1fr 1fr; }
+  form label:first-child, form button, .message { grid-column: 1 / -1; }
+}

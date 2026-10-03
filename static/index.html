@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#2d6a4f">
+    <title>KukuTrack</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">KukuTrack</p>
+        <h1>Suivi de mes poulets</h1>
+        <p>Créez un lot et suivez les rappels du calendrier.</p>
+      </header>
+
+      <section class="card" aria-labelledby="new-batch-title">
+        <h2 id="new-batch-title">Nouveau lot</h2>
+        <form id="batch-form">
+          <label>Nom du lot
+            <input id="name" name="name" required placeholder="Ex. Lot octobre">
+          </label>
+          <label>Date de début
+            <input id="start-date" name="start_date" type="date" required>
+          </label>
+          <label>Nombre de poussins
+            <input name="initial_count" type="number" min="1" required inputmode="numeric">
+          </label>
+          <label>Poids cible (g)
+            <input name="target_weight_g" type="number" min="1" value="3000" required inputmode="numeric">
+          </label>
+          <button type="submit">Créer le lot</button>
+          <p id="form-message" class="message" role="status"></p>
+        </form>
+      </section>
+
+      <section aria-labelledby="batches-title">
+        <h2 id="batches-title">Mes lots</h2>
+        <div id="batches" aria-live="polite"></div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
