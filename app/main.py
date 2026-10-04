@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.db import initialize_database
-from app.routers import batches, reminders
+from app.routers import batches, logs, reminders
 
 
 @asynccontextmanager
@@ -19,6 +19,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="KukuTrack", lifespan=lifespan)
 app.include_router(batches.router)
+app.include_router(logs.router)
 app.include_router(reminders.router)
 
 

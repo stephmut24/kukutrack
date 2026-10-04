@@ -40,6 +40,63 @@
         <h2 id="batches-title">Mes lots</h2>
         <div id="batches" aria-live="polite"></div>
       </section>
+
+      <section id="tracking" hidden aria-labelledby="tracking-title">
+        <button id="close-tracking" class="secondary" type="button">Retour aux lots</button>
+        <h2 id="tracking-title">Suivi du lot</h2>
+        <p id="tracking-batch-name"></p>
+        <div class="counts" aria-live="polite">
+          <p><strong id="birds-alive">—</strong> oiseaux vivants</p>
+          <p>Jour <strong id="day-number">—</strong> · <span id="total-dead">—</span> morts</p>
+        </div>
+
+        <section class="card" aria-labelledby="daily-log-title">
+          <h3 id="daily-log-title">Journal du jour</h3>
+          <form id="daily-log-form">
+            <label>Date
+              <input id="log-date" name="log_date" type="date" required>
+            </label>
+            <label>Morts
+              <input id="dead-count" name="dead_count" type="number" min="0" value="0" required inputmode="numeric">
+            </label>
+            <label>Aliment (kg)
+              <input id="feed-kg" name="feed_kg" type="number" min="0" step="0.1" value="0" required inputmode="decimal">
+            </label>
+            <label class="wide">Note
+              <textarea id="log-note" name="note" rows="3" placeholder="Observation facultative"></textarea>
+            </label>
+            <button id="daily-log-submit" type="submit">Enregistrer le journal</button>
+            <button id="cancel-log-edit" class="secondary" type="button" hidden>Annuler la modification</button>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="weigh-in-title">
+          <h3 id="weigh-in-title">Pesée</h3>
+          <form id="weigh-in-form">
+            <label>Date
+              <input id="weigh-date" name="weigh_date" type="date" required>
+            </label>
+            <label>Taille de l'échantillon
+              <input name="sample_size" type="number" min="1" required inputmode="numeric">
+            </label>
+            <label>Poids moyen (g)
+              <input name="average_weight_g" type="number" min="1" step="1" required inputmode="decimal">
+            </label>
+            <button type="submit">Enregistrer la pesée</button>
+          </form>
+        </section>
+
+        <p id="tracking-message" class="message" role="status"></p>
+
+        <section aria-labelledby="recent-logs-title">
+          <h3 id="recent-logs-title">Journaux récents</h3>
+          <div id="daily-logs" class="records"></div>
+        </section>
+        <section aria-labelledby="recent-weigh-ins-title">
+          <h3 id="recent-weigh-ins-title">Pesées récentes</h3>
+          <div id="weigh-ins" class="records"></div>
+        </section>
+      </section>
     </main>
     <script src="/app.js"></script>
   </body>
