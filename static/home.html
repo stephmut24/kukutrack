@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#176b43">
+<title>KukuTrack — Accueil</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<p id="connection-banner" class="connection-banner" role="alert" hidden>Impossible de joindre l'ordinateur. Vérifiez qu'il est allumé et connecté au Wi-Fi.</p>
+<aside class="app-sidebar" aria-label="Navigation principale">
+<a class="brand" href="/"><img src="/icon.svg" width="40" height="40" alt=""><span>KukuTrack</span></a>
+<a class="sidebar-create" href="/lots#new-batch-title">＋ Nouveau lot</a>
+<nav class="sidebar-nav">
+<a href="/" aria-current="page"><span>⌂</span> Accueil</a>
+<a href="/lots"><span>▦</span> Mes lots</a>
+</nav>
+<div data-lot-navigation></div>
+<div class="sidebar-bottom">
+<p id="server-status" class="server-status" role="status">Vérification de l'ordinateur…</p>
+<a class="sidebar-backup" href="/api/backup">↓ Télécharger une sauvegarde</a>
+</div>
+</aside>
+<div class="app-page">
+<header class="topbar">
+<a class="mobile-brand" href="/"><img src="/icon.svg" width="32" height="32" alt=""> KukuTrack</a>
+<a class="topbar-backup" href="/api/backup">Sauvegarde</a>
+</header>
+<div class="mobile-lot-navigation" data-lot-navigation></div>
+<main>
+<section class="welcome-panel" aria-labelledby="welcome-title">
+<div class="page-heading">
+<div>
+<p class="eyebrow">Suivi local de votre élevage</p>
+<h1 id="welcome-title">Accueil</h1>
+<p>Retrouvez le lot choisi et reprenez rapidement votre travail.</p>
+</div>
+<a class="button-link primary-action" href="/lots">Voir mes lots</a>
+</div>
+<div class="welcome-layout">
+<section class="card selected-batch-card" aria-labelledby="selected-batch-title">
+<div class="card-heading"><span class="section-icon">◉</span><div><h2 id="selected-batch-title">Lot à suivre</h2><p id="home-batch-summary">Chargement des lots…</p></div></div>
+<div id="home-selected-batch" aria-live="polite"></div>
+</section>
+<section class="card quick-start-card" aria-labelledby="quick-start-title">
+<div class="card-heading"><span class="section-icon neutral">＋</span><div><h2 id="quick-start-title">Démarrer</h2><p>Créez un lot ou choisissez-en un dans la liste.</p></div></div>
+<div class="home-actions"><a class="button-link primary-action" href="/lots#new-batch-title">Créer un lot</a><a class="button-link secondary" href="/lots">Mes lots</a></div>
+</section>
+</div>
+</section>
+</main>
+</div>
+<script type="module" src="/js/welcome.js"></script>
+</body>
+</html>

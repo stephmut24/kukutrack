@@ -1,5 +1,8 @@
-const CACHE_NAME = "kukutrack-shell-v3";
-const SHELL_FILES = ["/", "/index.html", "/style.css", "/app.js", "/manifest.webmanifest", "/icon.svg"];
+const CACHE_NAME = "kukutrack-shell-v9";
+const SHELL_FILES = [
+  "/", "/lots", "/index.html", "/batch.html", "/journal.html", "/style.css", "/manifest.webmanifest", "/icon.svg",
+  "/js/shared.js", "/js/welcome.js", "/js/home.js", "/js/dashboard.js", "/js/journal.js",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_FILES)));

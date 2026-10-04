@@ -1,198 +1,88 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#2d6a4f">
-    <title>KukuTrack</title>
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="stylesheet" href="/style.css">
-  </head>
-  <body>
-    <p id="connection-banner" class="connection-banner" role="alert" hidden>Impossible de joindre l'ordinateur. Vérifiez qu'il est allumé et connecté au Wi-Fi.</p>
-    <main>
-      <header>
-        <p class="eyebrow">KukuTrack</p>
-        <h1>Suivi de mes poulets</h1>
-        <p>Créez un lot et suivez les rappels du calendrier.</p>
-        <p id="server-status" class="server-status" role="status">Vérification de l'ordinateur…</p>
-        <a class="button-link secondary" href="/api/backup">Télécharger une sauvegarde</a>
-      </header>
-
-      <section class="card" aria-labelledby="new-batch-title">
-        <h2 id="new-batch-title">Nouveau lot</h2>
-        <form id="batch-form">
-          <label>Nom du lot
-            <input id="name" name="name" required placeholder="Ex. Lot octobre">
-          </label>
-          <label>Date de début
-            <input id="start-date" name="start_date" type="date" required>
-          </label>
-          <label>Nombre de poussins
-            <input name="initial_count" type="number" min="1" required inputmode="numeric">
-          </label>
-          <label>Poids cible (g)
-            <input name="target_weight_g" type="number" min="1" value="3000" required inputmode="numeric">
-          </label>
-          <button type="submit">Créer le lot</button>
-          <p id="form-message" class="message" role="status"></p>
-        </form>
-      </section>
-
-      <section aria-labelledby="batches-title">
-        <h2 id="batches-title">Mes lots</h2>
-        <div id="batches" aria-live="polite"></div>
-      </section>
-
-      <section id="tracking" hidden aria-labelledby="tracking-title">
-        <button id="close-tracking" class="secondary" type="button">Retour aux lots</button>
-        <h2 id="tracking-title">Suivi du lot</h2>
-        <p id="tracking-batch-name"></p>
-        <div class="counts" aria-live="polite">
-          <p><strong id="birds-alive">—</strong> oiseaux vivants</p>
-          <p>Jour <strong id="day-number">—</strong> · <span id="total-dead">—</span> morts</p>
-        </div>
-
-        <section id="dashboard" aria-labelledby="dashboard-title">
-          <h3 id="dashboard-title">Vue d'ensemble</h3>
-          <section id="dashboard-alerts" class="dashboard-alerts" aria-live="polite" hidden>
-            <h4>À vérifier</h4>
-            <div id="alerts-list"></div>
-          </section>
-          <div class="stat-cards">
-            <article class="stat-card"><span>Oiseaux vivants</span><strong id="dashboard-birds-alive">—</strong></article>
-            <article class="stat-card"><span>Mortalité</span><strong id="dashboard-mortality">—</strong></article>
-            <article class="stat-card"><span>Aliment total</span><strong id="dashboard-feed">—</strong></article>
-            <article class="stat-card"><span>Dernière pesée</span><strong id="dashboard-weight">—</strong></article>
-          </div>
-          <p id="overdue-reminders" class="subtle"></p>
-
-          <article class="card weekly-summary" aria-labelledby="weekly-summary-title">
-            <h4 id="weekly-summary-title">Résumé de la semaine</h4>
-            <p id="weekly-summary-source" class="summary-source">Résumé automatique</p>
-            <p id="weekly-summary-text">Chargement du résumé…</p>
-          </article>
-
-          <article class="card chart-card">
-            <h4>Poids moyen et cible (g)</h4>
-            <svg id="weight-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique du poids moyen et de la cible"></svg>
-            <p id="weight-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
-          </article>
-          <article class="card chart-card">
-            <h4>Mortalité par jour et cumulée</h4>
-            <svg id="mortality-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique de la mortalité"></svg>
-            <p id="mortality-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
-          </article>
-          <article class="card chart-card">
-            <h4>Aliment par oiseau (kg)</h4>
-            <svg id="feed-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique de l'aliment par oiseau"></svg>
-            <p id="feed-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
-          </article>
-        </section>
-
-        <section class="card" aria-labelledby="assistant-title">
-          <h3 id="assistant-title">Dis-moi ce qui s'est passé</h3>
-          <form id="assistant-parse-form">
-            <label>Votre message
-              <textarea id="assistant-text" name="text" rows="3" required placeholder="Ex. ce matin 2 morts et 4 kg d'aliment"></textarea>
-            </label>
-            <p class="subtle">Vous pouvez utiliser la touche microphone du clavier pour dicter.</p>
-            <input id="assistant-audio" type="file" accept="audio/*" capture="user" hidden>
-            <button id="assistant-record-button" class="secondary" type="button">Parler</button>
-            <button id="assistant-upload-button" class="secondary" type="button">Choisir un audio</button>
-            <button id="assistant-stop-recording" class="danger" type="button" hidden>Arrêter l'enregistrement</button>
-            <button id="assistant-cancel-recording" class="secondary" type="button" hidden>Annuler</button>
-            <p id="assistant-audio-hint" class="subtle">Sur ordinateur, choisissez un enregistrement audio. Sur téléphone, ouvrez l'enregistreur.</p>
-            <button id="assistant-parse-button" type="submit">Comprendre</button>
-            <button id="assistant-cancel-request" class="secondary" type="button" hidden>Annuler l'attente</button>
-            <a class="manual-link" href="#daily-log-title">Saisie manuelle</a>
-            <p id="assistant-message" class="message" role="status"></p>
-          </form>
-
-          <section id="assistant-confirmation" class="assistant-confirmation" hidden aria-labelledby="assistant-confirmation-title">
-            <h4 id="assistant-confirmation-title">J'ai compris :</h4>
-            <p id="assistant-birds-alive" class="subtle"></p>
-            <div id="assistant-unclear" class="unclear" hidden></div>
-            <div id="assistant-existing-log" class="existing-log" hidden></div>
-            <form id="assistant-confirm-form">
-              <label>Date
-                <input id="assistant-log-date" type="date" required>
-              </label>
-              <label>Morts
-                <input id="assistant-dead-count" type="number" min="0" inputmode="numeric">
-              </label>
-              <label>Aliment (kg)
-                <input id="assistant-feed-kg" type="number" min="0" step="0.1" inputmode="decimal">
-              </label>
-              <label>Taille de l'échantillon
-                <input id="assistant-sample-size" type="number" min="1" inputmode="numeric">
-              </label>
-              <label>Poids moyen (g)
-                <input id="assistant-average-weight" type="number" min="1" inputmode="decimal">
-              </label>
-              <label class="wide">Note
-                <textarea id="assistant-note" rows="3" placeholder="Observation facultative"></textarea>
-              </label>
-              <fieldset id="assistant-mode" hidden>
-                <legend>Un journal existe déjà pour cette date</legend>
-                <label><input type="radio" name="assistant-mode" value="add" checked> Ajouter</label>
-                <label><input type="radio" name="assistant-mode" value="replace"> Remplacer</label>
-              </fieldset>
-              <button id="assistant-confirm-button" type="submit">Valider</button>
-              <button id="assistant-cancel-confirmation" class="secondary" type="button">Annuler</button>
-            </form>
-          </section>
-        </section>
-
-        <section class="card" aria-labelledby="daily-log-title">
-          <h3 id="daily-log-title">Journal du jour</h3>
-          <form id="daily-log-form">
-            <label>Date
-              <input id="log-date" name="log_date" type="date" required>
-            </label>
-            <label>Morts
-              <input id="dead-count" name="dead_count" type="number" min="0" value="0" required inputmode="numeric">
-            </label>
-            <label>Aliment (kg)
-              <input id="feed-kg" name="feed_kg" type="number" min="0" step="0.1" value="0" required inputmode="decimal">
-            </label>
-            <label class="wide">Note
-              <textarea id="log-note" name="note" rows="3" placeholder="Observation facultative"></textarea>
-            </label>
-            <button id="daily-log-submit" type="submit">Enregistrer le journal</button>
-            <button id="cancel-log-edit" class="secondary" type="button" hidden>Annuler la modification</button>
-          </form>
-        </section>
-
-        <section class="card" aria-labelledby="weigh-in-title">
-          <h3 id="weigh-in-title">Pesée</h3>
-          <form id="weigh-in-form">
-            <label>Date
-              <input id="weigh-date" name="weigh_date" type="date" required>
-            </label>
-            <label>Taille de l'échantillon
-              <input name="sample_size" type="number" min="1" required inputmode="numeric">
-            </label>
-            <label>Poids moyen (g)
-              <input name="average_weight_g" type="number" min="1" step="1" required inputmode="decimal">
-            </label>
-            <button type="submit">Enregistrer la pesée</button>
-          </form>
-        </section>
-
-        <p id="tracking-message" class="message" role="status"></p>
-
-        <section aria-labelledby="recent-logs-title">
-          <h3 id="recent-logs-title">Journaux récents</h3>
-          <div id="daily-logs" class="records"></div>
-        </section>
-        <section aria-labelledby="recent-weigh-ins-title">
-          <h3 id="recent-weigh-ins-title">Pesées récentes</h3>
-          <div id="weigh-ins" class="records"></div>
-        </section>
-      </section>
-    </main>
-    <script src="/app.js"></script>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#176b43">
+<title>KukuTrack — Mes lots</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<p id="connection-banner" class="connection-banner" role="alert" hidden>Impossible de joindre l'ordinateur. Vérifiez qu'il est allumé et connecté au Wi-Fi.</p>
+<aside class="app-sidebar" aria-label="Navigation principale">
+<a class="brand" href="/">
+<img src="/icon.svg" width="40" height="40" alt="">
+<span>KukuTrack</span>
+</a>
+<a class="sidebar-create" href="#new-batch-title">＋ Nouveau lot</a>
+<nav class="sidebar-nav">
+<a href="/"><span>⌂</span> Accueil</a>
+<a href="/lots" aria-current="page"><span>▦</span> Mes lots</a>
+</nav>
+<div data-lot-navigation></div>
+<div class="sidebar-bottom">
+<p id="server-status" class="server-status" role="status">Vérification de l'ordinateur…</p>
+<a class="sidebar-backup" href="/api/backup">↓ Télécharger une sauvegarde</a>
+</div>
+</aside>
+<div class="app-page">
+<header class="topbar">
+<a class="mobile-brand" href="/">
+<img src="/icon.svg" width="32" height="32" alt=""> KukuTrack</a>
+<a class="topbar-backup" href="/api/backup">Sauvegarde</a>
+</header>
+<div class="mobile-lot-navigation" data-lot-navigation></div>
+<main>
+<section id="home" class="home-panel" aria-labelledby="home-title">
+<div class="page-heading">
+<div>
+<p class="eyebrow">Suivi local de votre élevage</p>
+<h1 id="home-title">Mes lots</h1>
+<p>Créez une bande, enregistrez les observations et retrouvez l’essentiel en quelques secondes.</p>
+</div>
+<a class="button-link primary-action" href="#new-batch-title">＋ Nouveau lot</a>
+</div>
+<div class="home-layout">
+<section class="batches-panel" aria-labelledby="batches-title">
+<div class="section-heading">
+<div>
+<h2 id="batches-title">Lots enregistrés</h2>
+<p>Choisissez « Ouvrir le suivi » sur un lot pour accéder à son tableau de bord et à son journal.</p>
+</div>
+</div>
+<div id="batches" aria-live="polite">
+</div>
+</section>
+<section class="card create-batch-card" aria-labelledby="new-batch-title">
+<div class="card-heading">
+<span class="section-icon">＋</span>
+<div>
+<h2 id="new-batch-title">Nouveau lot</h2>
+<p>Les rappels restent modifiables après création.</p>
+</div>
+</div>
+<form id="batch-form" class="form-grid">
+<label>Nom du lot<input id="name" name="name" required placeholder="Ex. Lot octobre">
+</label>
+<label>Date de début<input id="start-date" name="start_date" type="date" required>
+</label>
+<label>Nombre de poussins<input name="initial_count" type="number" min="1" required inputmode="numeric" placeholder="Ex. 100">
+</label>
+<label>Poids cible (g)<input name="target_weight_g" type="number" min="1" value="3000" required inputmode="numeric">
+</label>
+<p class="form-help wide">Le poids cible et le calendrier sont des paramètres à confirmer puis à ajuster selon votre élevage.</p>
+<button class="wide" type="submit">Créer le lot</button>
+<p id="form-message" class="message wide" role="status">
+</p>
+</form>
+</section>
+</div>
+</section>
+</main>
+</div>
+<script type="module" src="/js/home.js">
+</script>
+</body>
 </html>

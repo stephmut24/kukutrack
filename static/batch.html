@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#176b43">
+<title>KukuTrack — Suivi</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<p id="connection-banner" class="connection-banner" role="alert" hidden>Impossible de joindre l'ordinateur. Vérifiez qu'il est allumé et connecté au Wi-Fi.</p>
+<aside class="app-sidebar" aria-label="Navigation principale">
+<a class="brand" href="/">
+<img src="/icon.svg" width="40" height="40" alt="">
+<span>KukuTrack</span>
+</a>
+<nav class="sidebar-nav">
+<a href="/"><span>⌂</span> Accueil</a>
+<a href="/lots"><span>▦</span> Mes lots</a>
+<a href="#tracking" aria-current="page">
+<span>▤</span> Tableau de bord</a>
+<a id="journal-link" href="/">
+<span>✎</span> Journal</a>
+</nav>
+<div data-lot-navigation></div>
+<div class="sidebar-bottom">
+<p id="server-status" class="server-status" role="status">Vérification de l'ordinateur…</p>
+<a class="sidebar-backup" href="/api/backup">↓ Télécharger une sauvegarde</a>
+</div>
+</aside>
+<div class="app-page">
+<header class="topbar">
+<a class="mobile-brand" href="/">
+<img src="/icon.svg" width="32" height="32" alt=""> KukuTrack</a>
+<a class="topbar-backup" href="/api/backup">Sauvegarde</a>
+</header>
+<div class="mobile-lot-navigation" data-lot-navigation></div>
+<main>
+<section id="tracking" aria-labelledby="tracking-title">
+<div class="tracking-heading">
+<div>
+<a class="back-button button-link secondary" href="/lots">← Mes lots</a>
+<p class="eyebrow">Suivi du lot</p>
+<h1 id="tracking-title">
+<span id="tracking-batch-name">Chargement…</span>
+</h1>
+<div class="counts">
+<p>
+<strong id="birds-alive">—</strong> oiseaux vivants</p>
+<p>Jour <strong id="day-number">—</strong> · <span id="total-dead">—</span> morts</p>
+</div>
+</div>
+<a id="journal-link-top" class="button-link primary-action" href="/">Ouvrir le journal</a>
+</div>
+<section id="dashboard" aria-labelledby="dashboard-title">
+<div class="section-heading dashboard-heading">
+<div>
+<p class="eyebrow">Vue d'ensemble</p>
+<h2 id="dashboard-title">Le lot en un coup d’œil</h2>
+</div>
+<p id="overdue-reminders" class="overdue-reminders">
+</p>
+</div>
+<section id="dashboard-alerts" class="dashboard-alerts" aria-live="polite" hidden>
+<h3>À vérifier</h3>
+<div id="alerts-list">
+</div>
+</section>
+<div class="stat-cards">
+<article class="stat-card">
+<span>Oiseaux vivants</span>
+<strong id="dashboard-birds-alive">—</strong>
+</article>
+<article class="stat-card mortality">
+<span>Mortalité</span>
+<strong id="dashboard-mortality">—</strong>
+</article>
+<article class="stat-card">
+<span>Aliment total</span>
+<strong id="dashboard-feed">—</strong>
+</article>
+<article class="stat-card">
+<span>Dernière pesée</span>
+<strong id="dashboard-weight">—</strong>
+</article>
+</div>
+<div class="dashboard-layout">
+<article class="card chart-card chart-featured">
+<div class="card-heading">
+<div>
+<h3>Poids et objectif</h3>
+<p>Évolution des pesées enregistrées.</p>
+</div>
+</div>
+<svg id="weight-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique du poids moyen et de la cible">
+</svg>
+<p id="weight-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
+</article>
+<article class="card weekly-summary">
+<h3>Résumé de la semaine</h3>
+<p id="weekly-summary-source" class="summary-source">Résumé automatique</p>
+<p id="weekly-summary-text">Chargement du résumé…</p>
+</article>
+<article class="card chart-card">
+<h3>Mortalité par jour</h3>
+<svg id="mortality-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique de la mortalité">
+</svg>
+<p id="mortality-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
+</article>
+<article class="card chart-card">
+<h3>Aliment par oiseau (kg)</h3>
+<svg id="feed-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique de l'aliment par oiseau">
+</svg>
+<p id="feed-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
+</article>
+</div>
+</section>
+<section class="card reminders-card">
+<div class="section-heading">
+<div>
+<h2>Rappels</h2>
+<p>Marquez un rappel lorsqu’il est terminé.</p>
+</div>
+</div>
+<div id="batch-reminders" class="reminders">
+</div>
+</section>
+<p id="dashboard-message" class="message" role="status">
+</p>
+</section>
+</main>
+</div>
+<script type="module" src="/js/dashboard.js">
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.db import initialize_database
@@ -25,6 +26,18 @@ app.include_router(dashboard.router)
 app.include_router(logs.router)
 app.include_router(reminders.router)
 app.include_router(status.router)
+
+
+@app.get("/", include_in_schema=False)
+def home_page() -> FileResponse:
+    """Serve the general home screen."""
+    return FileResponse("static/home.html")
+
+
+@app.get("/lots", include_in_schema=False)
+def batches_page() -> FileResponse:
+    """Serve the batch list and creation screen."""
+    return FileResponse("static/index.html")
 
 
 @app.get("/api/health")

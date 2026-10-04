@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#176b43">
+<title>KukuTrack — Journal</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<p id="connection-banner" class="connection-banner" role="alert" hidden>Impossible de joindre l'ordinateur. Vérifiez qu'il est allumé et connecté au Wi-Fi.</p>
+<aside class="app-sidebar" aria-label="Navigation principale">
+<a class="brand" href="/">
+<img src="/icon.svg" width="40" height="40" alt="">
+<span>KukuTrack</span>
+</a>
+<nav class="sidebar-nav">
+<a href="/"><span>⌂</span> Accueil</a>
+<a href="/lots"><span>▦</span> Mes lots</a>
+<a id="dashboard-link" href="/">
+<span>▤</span> Tableau de bord</a>
+<a id="journal-self-link" href="#tracking" aria-current="page">
+<span>✎</span> Journal</a>
+</nav>
+<div data-lot-navigation></div>
+<div class="sidebar-bottom">
+<p id="server-status" class="server-status" role="status">Vérification de l'ordinateur…</p>
+<a class="sidebar-backup" href="/api/backup">↓ Télécharger une sauvegarde</a>
+</div>
+</aside>
+<div class="app-page">
+<header class="topbar">
+<a class="mobile-brand" href="/">
+<img src="/icon.svg" width="32" height="32" alt=""> KukuTrack</a>
+<a class="topbar-backup" href="/api/backup">Sauvegarde</a>
+</header>
+<div class="mobile-lot-navigation" data-lot-navigation></div>
+<main>
+<section id="tracking" aria-labelledby="tracking-title">
+<div class="tracking-heading">
+<div>
+<a class="back-button button-link secondary" href="/lots">← Mes lots</a>
+<p class="eyebrow">Journal du lot</p>
+<h1 id="tracking-title">
+<span id="tracking-batch-name">Chargement…</span>
+</h1>
+<div class="counts">
+<p>
+<strong id="birds-alive">—</strong> oiseaux vivants</p>
+<p>Jour <strong id="day-number">—</strong> · <span id="total-dead">—</span> morts</p>
+</div>
+</div>
+<a id="dashboard-link-top" class="button-link primary-action" href="/">Voir le tableau de bord</a>
+</div>
+<div class="entry-layout">
+<section class="card assistant-card" aria-labelledby="assistant-title">
+<div class="card-heading">
+<span class="section-icon">✦</span>
+<div>
+<h2 id="assistant-title">Dis-moi ce qui s'est passé</h2>
+<p>L’assistant propose ; vous vérifiez avant d’enregistrer.</p>
+</div>
+</div>
+<form id="assistant-parse-form" class="assistant-form">
+<label>Votre message<textarea id="assistant-text" name="text" rows="4" required placeholder="Ex. ce matin 2 morts et 4 kg d'aliment">
+</textarea>
+</label>
+<div class="voice-actions">
+<input id="assistant-audio" type="file" accept="audio/*" capture="user" hidden>
+<button id="assistant-record-button" class="secondary" type="button">Parler</button>
+<button id="assistant-upload-button" class="secondary" type="button">Choisir un audio</button>
+<button id="assistant-stop-recording" class="danger" type="button" hidden>Arrêter l'enregistrement</button>
+<button id="assistant-cancel-recording" class="secondary" type="button" hidden>Annuler</button>
+</div>
+<p id="assistant-audio-hint" class="subtle">Écrivez ou dictez ; le texte restera modifiable.</p>
+<div class="form-actions">
+<button id="assistant-parse-button" type="submit">Comprendre</button>
+<button id="assistant-cancel-request" class="secondary" type="button" hidden>Annuler l'attente</button>
+</div>
+<a class="manual-link" href="#daily-log-title">Passer à la saisie manuelle</a>
+<p id="assistant-message" class="message" role="status">
+</p>
+</form>
+<section id="assistant-confirmation" class="assistant-confirmation" hidden aria-labelledby="assistant-confirmation-title">
+<div class="card-heading">
+<span class="section-icon">✓</span>
+<div>
+<h3 id="assistant-confirmation-title">J'ai compris :</h3>
+<p id="assistant-birds-alive" class="subtle">
+</p>
+</div>
+</div>
+<div id="assistant-unclear" class="unclear" hidden>
+</div>
+<div id="assistant-existing-log" class="existing-log" hidden>
+</div>
+<form id="assistant-confirm-form" class="form-grid">
+<label>Date<input id="assistant-log-date" type="date" required>
+</label>
+<label>Morts<input id="assistant-dead-count" type="number" min="0" inputmode="numeric">
+</label>
+<label>Aliment (kg)<input id="assistant-feed-kg" type="number" min="0" step="0.1" inputmode="decimal">
+</label>
+<label>Taille de l'échantillon<input id="assistant-sample-size" type="number" min="1" inputmode="numeric">
+</label>
+<label>Poids moyen (g)<input id="assistant-average-weight" type="number" min="1" inputmode="decimal">
+</label>
+<label class="wide">Note<textarea id="assistant-note" rows="3" placeholder="Observation facultative">
+</textarea>
+</label>
+<fieldset id="assistant-mode" class="wide" hidden>
+<legend>Un journal existe déjà pour cette date</legend>
+<label>
+<input type="radio" name="assistant-mode" value="add" checked> Ajouter</label>
+<label>
+<input type="radio" name="assistant-mode" value="replace"> Remplacer</label>
+</fieldset>
+<div class="form-actions wide">
+<button id="assistant-confirm-button" type="submit">Valider</button>
+<button id="assistant-cancel-confirmation" class="secondary" type="button">Annuler</button>
+</div>
+</form>
+</section>
+</section>
+<div class="manual-column">
+<section class="card" aria-labelledby="daily-log-title">
+<div class="card-heading">
+<span class="section-icon neutral">✎</span>
+<div>
+<h2 id="daily-log-title">Journal du jour</h2>
+<p>Saisie manuelle des observations quotidiennes.</p>
+</div>
+</div>
+<form id="daily-log-form" class="form-grid">
+<label>Date<input id="log-date" name="log_date" type="date" required>
+</label>
+<label>Morts<input id="dead-count" name="dead_count" type="number" min="0" value="0" required inputmode="numeric">
+</label>
+<label>Aliment (kg)<input id="feed-kg" name="feed_kg" type="number" min="0" step="0.1" value="0" required inputmode="decimal">
+</label>
+<label class="wide">Note<textarea id="log-note" name="note" rows="3" placeholder="Observation facultative">
+</textarea>
+</label>
+<div class="form-actions wide">
+<button id="daily-log-submit" type="submit">Enregistrer le journal</button>
+<button id="cancel-log-edit" class="secondary" type="button" hidden>Annuler la modification</button>
+</div>
+</form>
+</section>
+<section class="card" aria-labelledby="weigh-in-title">
+<div class="card-heading">
+<span class="section-icon neutral">◌</span>
+<div>
+<h2 id="weigh-in-title">Pesée</h2>
+<p>Enregistrez la moyenne d’un échantillon.</p>
+</div>
+</div>
+<form id="weigh-in-form" class="form-grid">
+<label>Date<input id="weigh-date" name="weigh_date" type="date" required>
+</label>
+<label>Taille de l'échantillon<input name="sample_size" type="number" min="1" required inputmode="numeric">
+</label>
+<label class="wide">Poids moyen (g)<input name="average_weight_g" type="number" min="1" step="1" required inputmode="decimal">
+</label>
+<button class="wide" type="submit">Enregistrer la pesée</button>
+</form>
+</section>
+</div>
+</div>
+<p id="tracking-message" class="message tracking-message" role="status">
+</p>
+<div class="records-layout">
+<section aria-labelledby="recent-logs-title">
+<div class="section-heading">
+<h2 id="recent-logs-title">Journaux récents</h2>
+</div>
+<div id="daily-logs" class="records">
+</div>
+</section>
+<section aria-labelledby="recent-weigh-ins-title">
+<div class="section-heading">
+<h2 id="recent-weigh-ins-title">Pesées récentes</h2>
+</div>
+<div id="weigh-ins" class="records">
+</div>
+</section>
+</div>
+</section>
+</main>
+</div>
+<script type="module" src="/js/journal.js">
+</script>
+</body>
+</html>
