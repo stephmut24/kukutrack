@@ -31,3 +31,15 @@ Wi-Fi, ouvrez `http://192.168.1.25:8000`. Vous pourrez ensuite choisir
 pytest
 ruff check .
 ```
+
+## Données de démonstration
+
+Pour remplir une base avec un lot **entièrement fictif** nommé `DEMO (fake data)` :
+
+```bash
+python scripts/seed_demo.py
+```
+
+La commande refuse de créer un second lot DEMO. Pour supprimer uniquement ce lot
+DEMO puis le recréer, utilisez `python scripts/seed_demo.py --reset`. Vous pouvez
+aussi cibler une autre base avec `python scripts/seed_demo.py --db chemin/vers/demo.db`.
