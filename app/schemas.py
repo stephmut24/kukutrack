@@ -227,6 +227,12 @@ class WeeklySummaryResponse(BaseModel):
     source: Literal["ai", "template"]
 
 
+class SystemStatusResponse(BaseModel):
+    server: Literal["ok"]
+    database: Literal["ok", "unavailable"]
+    assistant: Literal["available", "unavailable"]
+
+
 class ParsedEntry(BaseModel):
     """A proposed manual entry extracted locally from free text."""
 

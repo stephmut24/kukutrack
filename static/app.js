@@ -11,10 +11,107 @@ const assistantParseForm = document.querySelector("#assistant-parse-form");
 const assistantConfirmForm = document.querySelector("#assistant-confirm-form");
 const assistantMessageElement = document.querySelector("#assistant-message");
 const assistantConfirmationElement = document.querySelector("#assistant-confirmation");
+const connectionBannerElement = document.querySelector("#connection-banner");
+const serverStatusElement = document.querySelector("#server-status");
+const nativeFetch = window.fetch.bind(window);
 let selectedBatchId = null;
 let editingLogId = null;
 let assistantController = null;
 let assistantProposal = null;
+
+function setConnectionUnavailable() {
+  connectionBannerElement.hidden = false;
+}
+
+function setConnectionAvailable() {
+  connectionBannerElement.hidden = true;
+}
+
+async function apiFetch(...args) {
+  try {
+    const response = await nativeFetch(...args);
+    setConnectionAvailable();
+    return response;
+  } catch (error) {
+    setConnectionUnavailable();
+    throw error;
+  }
+}
+
+const fetch = apiFetch;
+
+function draftKey(name) {
+  return `kukutrack-draft-v1:${name}:${selectedBatchId ?? "home"}`;
+}
+
+function saveDraft(formElement, name) {
+  try {
+    localStorage.setItem(draftKey(name), JSON.stringify(Object.fromEntries(new FormData(formElement))));
+  } catch {
+    // A full or unavailable browser storage must not stop the farm app.
+  }
+}
+
+function restoreDraft(formElement, name) {
+  try {
+    const saved = localStorage.getItem(draftKey(name));
+    if (!saved) return;
+    const values = JSON.parse(saved);
+    Object.entries(values).forEach(([fieldName, value]) => {
+      const field = formElement.elements.namedItem(fieldName);
+      if (field instanceof RadioNodeList) {
+        Array.from(field).forEach((item) => { item.checked = item.value === value; });
+      } else if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
+        field.value = String(value);
+      }
+    });
+  } catch {
+    // A malformed or unavailable saved draft is safely ignored.
+  }
+}
+
+function clearDraft(name) {
+  try {
+    localStorage.removeItem(draftKey(name));
+  } catch {
+    // Clearing a draft is optional when browser storage is unavailable.
+  }
+}
+
+function saveTrackingDrafts() {
+  saveDraft(assistantParseForm, "assistant");
+  saveDraft(dailyLogForm, "daily-log");
+  saveDraft(weighInForm, "weigh-in");
+}
+
+function restoreTrackingDrafts() {
+  restoreDraft(assistantParseForm, "assistant");
+  restoreDraft(dailyLogForm, "daily-log");
+  restoreDraft(weighInForm, "weigh-in");
+}
+
+async function checkServerStatus() {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch("/api/status", { signal: controller.signal });
+    if (!response.ok) throw new Error("Statut indisponible");
+    const status = await response.json();
+    const assistant = status.assistant === "available"
+      ? "Assistant disponible"
+      : "Assistant indisponible — saisie manuelle disponible";
+    serverStatusElement.textContent = status.database === "ok"
+      ? `Ordinateur prêt · ${assistant}`
+      : "Base locale indisponible";
+    serverStatusElement.className = `server-status ${status.database === "ok" ? "ready" : "unavailable"}`;
+  } catch {
+    setConnectionUnavailable();
+    serverStatusElement.textContent = "Impossible de joindre l'ordinateur";
+    serverStatusElement.className = "server-status unavailable";
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -27,6 +124,7 @@ function resetDates() {
 }
 
 resetDates();
+restoreDraft(form, "batch");
 
 function showMessage(element, message, isError = false) {
   element.textContent = message;
@@ -295,6 +393,7 @@ async function confirmAssistantProposal() {
     if (!response.ok) throw new Error(await errorMessage(response, "Validation impossible."));
     resetAssistantConfirmation();
     document.querySelector("#assistant-text").value = "";
+    clearDraft("assistant");
     await openTracking(selectedBatchId);
     showMessage(assistantMessageElement, "Saisie enregistrée.");
   } catch (error) {
@@ -447,6 +546,7 @@ function renderWeighIns(weighIns) {
 }
 
 async function openTracking(batchId) {
+  if (selectedBatchId !== null && selectedBatchId !== batchId) saveTrackingDrafts();
   selectedBatchId = batchId;
   showMessage(trackingMessageElement, "");
   try {
@@ -465,6 +565,7 @@ async function openTracking(batchId) {
     renderDashboard(dashboard);
     renderDailyLogs(logs);
     renderWeighIns(weighIns);
+    restoreTrackingDrafts();
     trackingElement.hidden = false;
     trackingElement.scrollIntoView({ behavior: "smooth", block: "start" });
     void loadMonitoring(batchId);
@@ -501,6 +602,8 @@ form.addEventListener("submit", async (event) => {
   const values = Object.fromEntries(new FormData(form));
   values.initial_count = Number(values.initial_count);
   values.target_weight_g = Number(values.target_weight_g);
+  const submitButton = form.querySelector("button[type=submit]");
+  submitButton.disabled = true;
   try {
     const response = await fetch("/api/batches", {
       method: "POST",
@@ -511,10 +614,13 @@ form.addEventListener("submit", async (event) => {
     form.reset();
     document.querySelector("#start-date").value = today();
     document.querySelector("[name=target_weight_g]").value = "3000";
+    clearDraft("batch");
     showMessage(messageElement, "Lot créé avec ses rappels.");
     await loadBatches();
   } catch (error) {
     showMessage(messageElement, error.message || "Impossible de créer le lot.", true);
+  } finally {
+    submitButton.disabled = false;
   }
 });
 
@@ -525,18 +631,27 @@ dailyLogForm.addEventListener("submit", async (event) => {
   values.dead_count = Number(values.dead_count);
   values.feed_kg = Number(values.feed_kg);
   const endpoint = editingLogId ? `/api/logs/${editingLogId}` : `/api/batches/${selectedBatchId}/logs`;
-  const response = await fetch(endpoint, {
-    method: editingLogId ? "PATCH" : "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(values),
-  });
-  if (!response.ok) {
-    showMessage(trackingMessageElement, await errorMessage(response, "Journal impossible."), true);
-    return;
+  const submitButton = document.querySelector("#daily-log-submit");
+  submitButton.disabled = true;
+  try {
+    const response = await fetch(endpoint, {
+      method: editingLogId ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    if (!response.ok) {
+      showMessage(trackingMessageElement, await errorMessage(response, "Journal impossible."), true);
+      return;
+    }
+    clearDraft("daily-log");
+    resetDailyLogForm();
+    showMessage(trackingMessageElement, "Journal enregistré.");
+    await openTracking(selectedBatchId);
+  } catch (error) {
+    showMessage(trackingMessageElement, error.message || "Journal impossible.", true);
+  } finally {
+    submitButton.disabled = false;
   }
-  resetDailyLogForm();
-  showMessage(trackingMessageElement, "Journal enregistré.");
-  await openTracking(selectedBatchId);
 });
 
 weighInForm.addEventListener("submit", async (event) => {
@@ -545,19 +660,28 @@ weighInForm.addEventListener("submit", async (event) => {
   const values = Object.fromEntries(new FormData(weighInForm));
   values.sample_size = Number(values.sample_size);
   values.average_weight_g = Number(values.average_weight_g);
-  const response = await fetch(`/api/batches/${selectedBatchId}/weigh-ins`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(values),
-  });
-  if (!response.ok) {
-    showMessage(trackingMessageElement, await errorMessage(response, "Pesée impossible."), true);
-    return;
+  const submitButton = weighInForm.querySelector("button[type=submit]");
+  submitButton.disabled = true;
+  try {
+    const response = await fetch(`/api/batches/${selectedBatchId}/weigh-ins`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    if (!response.ok) {
+      showMessage(trackingMessageElement, await errorMessage(response, "Pesée impossible."), true);
+      return;
+    }
+    clearDraft("weigh-in");
+    weighInForm.reset();
+    document.querySelector("#weigh-date").value = today();
+    showMessage(trackingMessageElement, "Pesée enregistrée.");
+    await openTracking(selectedBatchId);
+  } catch (error) {
+    showMessage(trackingMessageElement, error.message || "Pesée impossible.", true);
+  } finally {
+    submitButton.disabled = false;
   }
-  weighInForm.reset();
-  document.querySelector("#weigh-date").value = today();
-  showMessage(trackingMessageElement, "Pesée enregistrée.");
-  await openTracking(selectedBatchId);
 });
 
 assistantParseForm.addEventListener("submit", async (event) => {
@@ -579,6 +703,7 @@ document.querySelector("#assistant-cancel-confirmation").addEventListener("click
 });
 document.querySelector("#cancel-log-edit").addEventListener("click", resetDailyLogForm);
 document.querySelector("#close-tracking").addEventListener("click", () => {
+  saveTrackingDrafts();
   assistantController?.abort();
   trackingElement.hidden = true;
   selectedBatchId = null;
@@ -588,4 +713,14 @@ document.querySelector("#close-tracking").addEventListener("click", () => {
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js");
 
+form.addEventListener("input", () => saveDraft(form, "batch"));
+[assistantParseForm, dailyLogForm, weighInForm].forEach((formElement, index) => {
+  const names = ["assistant", "daily-log", "weigh-in"];
+  formElement.addEventListener("input", () => saveDraft(formElement, names[index]));
+  formElement.addEventListener("change", () => saveDraft(formElement, names[index]));
+});
+window.addEventListener("offline", setConnectionUnavailable);
+window.addEventListener("online", () => { void checkServerStatus(); });
+window.setInterval(() => { void checkServerStatus(); }, 30000);
+void checkServerStatus();
 loadBatches();

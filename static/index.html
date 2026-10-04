@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#2d6a4f">
     <title>KukuTrack</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
+    <p id="connection-banner" class="connection-banner" role="alert" hidden>Impossible de joindre l'ordinateur. Vérifiez qu'il est allumé et connecté au Wi-Fi.</p>
     <main>
       <header>
         <p class="eyebrow">KukuTrack</p>
         <h1>Suivi de mes poulets</h1>
         <p>Créez un lot et suivez les rappels du calendrier.</p>
+        <p id="server-status" class="server-status" role="status">Vérification de l'ordinateur…</p>
+        <a class="button-link secondary" href="/api/backup">Télécharger une sauvegarde</a>
       </header>
 
       <section class="card" aria-labelledby="new-batch-title">
@@ -91,7 +95,7 @@
           <h3 id="assistant-title">Dis-moi ce qui s'est passé</h3>
           <form id="assistant-parse-form">
             <label>Votre message
-              <textarea id="assistant-text" rows="3" required placeholder="Ex. ce matin 2 morts et 4 kg d'aliment"></textarea>
+              <textarea id="assistant-text" name="text" rows="3" required placeholder="Ex. ce matin 2 morts et 4 kg d'aliment"></textarea>
             </label>
             <p class="subtle">Vous pouvez utiliser la touche microphone du clavier pour dicter.</p>
             <button id="assistant-parse-button" type="submit">Comprendre</button>
