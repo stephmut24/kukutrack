@@ -3,7 +3,7 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 ReminderCategory = Literal[
     "heating", "vaccine", "vitamin", "protein", "booster", "other"
@@ -213,3 +213,29 @@ class DashboardResponse(BaseModel):
     daily_mortality: list[DailyMortalityPoint]
     feed: list[FeedPoint]
     weight: list[WeightPoint]
+
+
+class ParsedEntry(BaseModel):
+    """A proposed manual entry extracted locally from free text."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    log_date: date | None = None
+    dead_count: int | None = None
+    feed_kg: float | None = None
+    sample_size: int | None = None
+    average_weight_g: float | None = None
+    note: str | None = None
+    unclear: list[str] = Field(default_factory=list)
+
+    @field_validator("note", mode="before")
+    @classmethod
+    def normalize_note(cls, value: str | None) -> str | None:
+        if isinstance(value, str):
+            return value.strip() or None
+        return value
+
+    @field_validator("unclear")
+    @classmethod
+    def normalize_unclear(cls, values: list[str]) -> list[str]:
+        return [value.strip() for value in values if value.strip()]

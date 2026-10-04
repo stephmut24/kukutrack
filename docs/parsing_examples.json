@@ -1,0 +1,14 @@
+[
+  {"today": "2026-06-10", "sentence": "ce matin 2 poussins morts, j'ai donné 4 kg d'aliment", "expected": {"log_date": "2026-06-10", "dead_count": 2, "feed_kg": 4, "sample_size": null, "average_weight_g": null, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "pesée de 10 poulets, moyenne 1250 g", "expected": {"log_date": "2026-06-10", "dead_count": null, "feed_kg": null, "sample_size": 10, "average_weight_g": 1250, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "hier 1 mort", "expected": {"log_date": "2026-06-09", "dead_count": 1, "feed_kg": null, "sample_size": null, "average_weight_g": null, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "j'ai donné 500 g d'aliment", "expected": {"log_date": "2026-06-10", "dead_count": null, "feed_kg": 0.5, "sample_size": null, "average_weight_g": null, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "aujourd'hui 3 morts", "expected": {"log_date": "2026-06-10", "dead_count": 3, "feed_kg": null, "sample_size": null, "average_weight_g": null, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "avant-hier 2 kg d'aliment", "expected": {"log_date": "2026-06-08", "dead_count": null, "feed_kg": 2, "sample_size": null, "average_weight_g": null, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "kuku 2 morts, chakula 3 kg", "expected": {"log_date": "2026-06-10", "dead_count": 2, "feed_kg": 3, "sample_size": null, "average_weight_g": null, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "nilipea kuku 2 kg aliment", "expected": {"log_date": "2026-06-10", "dead_count": null, "feed_kg": 2, "sample_size": null, "average_weight_g": null, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "échantillon de 12, poids moyen 980 g", "expected": {"log_date": "2026-06-10", "dead_count": null, "feed_kg": null, "sample_size": 12, "average_weight_g": 980, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "ce soir aucun mort", "expected": {"log_date": "2026-06-10", "dead_count": 0, "feed_kg": null, "sample_size": null, "average_weight_g": null, "note": null, "unclear": []}},
+  {"today": "2026-06-10", "sentence": "litière humide", "expected": {"log_date": "2026-06-10", "dead_count": null, "feed_kg": null, "sample_size": null, "average_weight_g": null, "note": "litière humide", "unclear": []}},
+  {"today": "2026-06-10", "sentence": "hier pesée de 6 oiseaux, moyenne 1100 g et 3 kg d'aliment", "expected": {"log_date": "2026-06-09", "dead_count": null, "feed_kg": 3, "sample_size": 6, "average_weight_g": 1100, "note": null, "unclear": []}}
+]
