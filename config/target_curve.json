@@ -1,0 +1,13 @@
+{
+  "_note": "Cette courbe est un exemple provisoire, à remplacer par la fiche technique de la souche du fermier ou les conseils de son vétérinaire. Ce ne sont pas des normes de croissance.",
+  "anchors": [
+    {"day": 1, "weight_g": 45},
+    {"day": 7, "weight_g": 180},
+    {"day": 14, "weight_g": 500},
+    {"day": 21, "weight_g": 950},
+    {"day": 28, "weight_g": 1450},
+    {"day": 35, "weight_g": 2000},
+    {"day": 42, "weight_g": 2500},
+    {"day": 56, "weight_g": 3000}
+  ]
+}

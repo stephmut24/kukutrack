@@ -43,8 +43,18 @@ button:active { background: #1e4c37; }
 .record p { margin: 0; }
 .record-actions { display: flex; gap: .5rem; }
 .record button { min-height: 42px; }
+.stat-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.stat-card { display: grid; gap: .35rem; min-height: 92px; padding: .85rem; border-radius: 10px; background: #dcefe3; color: #123d2a; }
+.stat-card span, .subtle { font-size: .9rem; }
+.stat-card strong { font-size: 1.25rem; }
+.subtle { color: #425148; margin: .75rem 0; }
+.chart-card { padding: 1rem; }
+.chart-card h4 { margin-top: 0; }
+.chart { width: 100%; height: auto; min-height: 170px; display: block; background: #fbfcfa; border: 1px solid #d6ddd6; border-radius: 8px; }
+.chart-empty { color: #425148; margin: .75rem 0 0; }
 
 @media (min-width: 600px) {
   form { grid-template-columns: 1fr 1fr; }
   form label:first-child, form button, .message, form .wide { grid-column: 1 / -1; }
+  .stat-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }

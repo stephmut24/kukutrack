@@ -169,3 +169,47 @@ class SummaryCountsResponse(BaseModel):
     birds_alive: int
     total_dead: int
     day_number: int
+
+
+class DailyMortalityPoint(BaseModel):
+    date: date
+    day_number: int
+    dead_count: int
+    cumulative_dead: int
+
+
+class FeedPoint(BaseModel):
+    date: date
+    day_number: int
+    feed_kg: float
+    cumulative_feed_kg: float
+    birds_alive: int
+    feed_per_bird_kg: float | None
+    cumulative_feed_per_initial_bird_kg: float
+
+
+class WeightPoint(BaseModel):
+    date: date
+    day_number: int
+    average_weight_g: float
+    target_weight_g: float
+
+
+class LatestWeightVsTarget(BaseModel):
+    day_number: int | None
+    average_weight_g: float | None
+    target_weight_g: float | None
+    gap_percent: float | None
+
+
+class DashboardResponse(BaseModel):
+    day_number: int
+    birds_alive: int
+    total_dead: int
+    mortality_rate_percent: float
+    total_feed_kg: float
+    latest_weight_vs_target: LatestWeightVsTarget
+    overdue_reminders: int
+    daily_mortality: list[DailyMortalityPoint]
+    feed: list[FeedPoint]
+    weight: list[WeightPoint]

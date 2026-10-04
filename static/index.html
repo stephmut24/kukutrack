@@ -50,6 +50,33 @@
           <p>Jour <strong id="day-number">—</strong> · <span id="total-dead">—</span> morts</p>
         </div>
 
+        <section id="dashboard" aria-labelledby="dashboard-title">
+          <h3 id="dashboard-title">Vue d'ensemble</h3>
+          <div class="stat-cards">
+            <article class="stat-card"><span>Oiseaux vivants</span><strong id="dashboard-birds-alive">—</strong></article>
+            <article class="stat-card"><span>Mortalité</span><strong id="dashboard-mortality">—</strong></article>
+            <article class="stat-card"><span>Aliment total</span><strong id="dashboard-feed">—</strong></article>
+            <article class="stat-card"><span>Dernière pesée</span><strong id="dashboard-weight">—</strong></article>
+          </div>
+          <p id="overdue-reminders" class="subtle"></p>
+
+          <article class="card chart-card">
+            <h4>Poids moyen et cible (g)</h4>
+            <svg id="weight-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique du poids moyen et de la cible"></svg>
+            <p id="weight-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
+          </article>
+          <article class="card chart-card">
+            <h4>Mortalité par jour et cumulée</h4>
+            <svg id="mortality-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique de la mortalité"></svg>
+            <p id="mortality-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
+          </article>
+          <article class="card chart-card">
+            <h4>Aliment par oiseau (kg)</h4>
+            <svg id="feed-chart" class="chart" viewBox="0 0 320 180" role="img" aria-label="Graphique de l'aliment par oiseau"></svg>
+            <p id="feed-chart-empty" class="chart-empty" hidden>Aucune donnée pour le moment.</p>
+          </article>
+        </section>
+
         <section class="card" aria-labelledby="daily-log-title">
           <h3 id="daily-log-title">Journal du jour</h3>
           <form id="daily-log-form">

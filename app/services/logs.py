@@ -279,7 +279,7 @@ def summary_counts(connection: sqlite3.Connection, batch_id: int) -> dict[str, i
     day_number = max(0, (today - start_date).days + 1)
     total_dead = _total_dead(connection, batch_id, today)
     return {
-        "birds_alive": int(batch["initial_count"]) - total_dead,
+        "birds_alive": birds_alive(connection, batch_id, today),
         "total_dead": total_dead,
         "day_number": day_number,
     }
