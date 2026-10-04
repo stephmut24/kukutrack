@@ -51,3 +51,30 @@ def chat_json(
     if not isinstance(content, str):
         raise AssistantBadOutput("La réponse du modèle local est invalide.")
     return content
+
+
+def chat_text(system: str, user: str, *, transport: httpx.BaseTransport | None = None) -> str:
+    """Ask the local Ollama model for one non-streaming plain-text response."""
+    payload = {
+        "model": OLLAMA_MODEL,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        "stream": False,
+        "options": {"temperature": 0},
+    }
+    try:
+        with httpx.Client(timeout=OLLAMA_TIMEOUT_S, transport=transport) as client:
+            response = client.post(f"{OLLAMA_URL}/api/chat", json=payload)
+            response.raise_for_status()
+    except httpx.HTTPError as error:
+        raise AssistantUnavailable("Le modèle local Ollama est indisponible.") from error
+
+    try:
+        content = response.json()["message"]["content"]
+    except (KeyError, TypeError, ValueError) as error:
+        raise AssistantBadOutput("La réponse du modèle local est invalide.") from error
+    if not isinstance(content, str):
+        raise AssistantBadOutput("La réponse du modèle local est invalide.")
+    return content

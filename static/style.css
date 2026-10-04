@@ -50,6 +50,15 @@ button:active { background: #1e4c37; }
 .subtle { color: #425148; margin: .75rem 0; }
 .chart-card { padding: 1rem; }
 .chart-card h4 { margin-top: 0; }
+.dashboard-alerts { margin: 1rem 0; }
+.dashboard-alerts h4 { margin: 0 0 .5rem; }
+.alert { margin: .5rem 0; padding: .8rem; border-radius: 8px; font-weight: 600; }
+.alert.warning { background: #fff0e6; border-left: 4px solid #a13b00; color: #672400; }
+.alert.info { background: #e7f0ff; border-left: 4px solid #1d4ed8; color: #123b78; }
+.weekly-summary { border: 2px solid #b7d6c0; }
+.weekly-summary h4 { margin-top: 0; }
+.weekly-summary p:last-child { margin-bottom: 0; }
+.summary-source { color: #1d5b42; font-size: .85rem; font-weight: 700; }
 .chart { width: 100%; height: auto; min-height: 170px; display: block; background: #fbfcfa; border: 1px solid #d6ddd6; border-radius: 8px; }
 .chart-empty { color: #425148; margin: .75rem 0 0; }
 .manual-link { display: inline-block; color: #1d5b42; font-weight: 700; padding: .5rem 0; }

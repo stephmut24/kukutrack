@@ -120,6 +120,51 @@ function renderDashboard(data) {
   ]);
 }
 
+function renderAlerts(alerts) {
+  const section = document.querySelector("#dashboard-alerts");
+  const list = document.querySelector("#alerts-list");
+  list.replaceChildren();
+  if (!alerts.length) {
+    section.hidden = true;
+    return;
+  }
+  alerts.forEach((alert) => {
+    const message = document.createElement("p");
+    message.className = `alert ${alert.level}`;
+    message.textContent = alert.message;
+    list.append(message);
+  });
+  section.hidden = false;
+}
+
+function renderWeeklySummary(summary) {
+  const source = document.querySelector("#weekly-summary-source");
+  const text = document.querySelector("#weekly-summary-text");
+  source.textContent = summary.source === "ai" ? "Écrit par l'IA locale" : "Résumé automatique";
+  text.textContent = summary.text;
+}
+
+async function loadMonitoring(batchId) {
+  document.querySelector("#weekly-summary-source").textContent = "Résumé automatique";
+  document.querySelector("#weekly-summary-text").textContent = "Chargement du résumé…";
+  try {
+    const [alertsResponse, summaryResponse] = await Promise.all([
+      fetch(`/api/batches/${batchId}/alerts`),
+      fetch(`/api/batches/${batchId}/summary`),
+    ]);
+    if (!alertsResponse.ok || !summaryResponse.ok) throw new Error();
+    const [alerts, summary] = await Promise.all([alertsResponse.json(), summaryResponse.json()]);
+    if (selectedBatchId !== batchId) return;
+    renderAlerts(alerts);
+    renderWeeklySummary(summary);
+  } catch {
+    if (selectedBatchId !== batchId) return;
+    renderAlerts([]);
+    document.querySelector("#weekly-summary-source").textContent = "Résumé automatique";
+    document.querySelector("#weekly-summary-text").textContent = "Résumé indisponible pour le moment.";
+  }
+}
+
 async function errorMessage(response, fallback) {
   try {
     const data = await response.json();
@@ -422,6 +467,7 @@ async function openTracking(batchId) {
     renderWeighIns(weighIns);
     trackingElement.hidden = false;
     trackingElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    void loadMonitoring(batchId);
   } catch {
     showMessage(messageElement, "Impossible de charger le suivi de ce lot.", true);
   }

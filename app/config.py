@@ -6,6 +6,7 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DB_PATH = PROJECT_DIR / "data" / "kukutrack.db"
 DEFAULT_SCHEDULE_PATH = PROJECT_DIR / "config" / "default_schedule.json"
+ALERT_THRESHOLDS_PATH = PROJECT_DIR / "config" / "alert_thresholds.json"
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").rstrip("/")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "SET_MODEL_NAME_FROM_OLLAMA_LIST")
 OLLAMA_TIMEOUT_S = float(os.environ.get("OLLAMA_TIMEOUT_S", "30"))

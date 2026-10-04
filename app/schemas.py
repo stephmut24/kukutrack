@@ -215,6 +215,18 @@ class DashboardResponse(BaseModel):
     weight: list[WeightPoint]
 
 
+class AlertResponse(BaseModel):
+    code: str
+    level: Literal["info", "warning"]
+    message: str
+    values: dict[str, float | int | str]
+
+
+class WeeklySummaryResponse(BaseModel):
+    text: str
+    source: Literal["ai", "template"]
+
+
 class ParsedEntry(BaseModel):
     """A proposed manual entry extracted locally from free text."""
 

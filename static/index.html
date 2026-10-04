@@ -52,6 +52,10 @@
 
         <section id="dashboard" aria-labelledby="dashboard-title">
           <h3 id="dashboard-title">Vue d'ensemble</h3>
+          <section id="dashboard-alerts" class="dashboard-alerts" aria-live="polite" hidden>
+            <h4>À vérifier</h4>
+            <div id="alerts-list"></div>
+          </section>
           <div class="stat-cards">
             <article class="stat-card"><span>Oiseaux vivants</span><strong id="dashboard-birds-alive">—</strong></article>
             <article class="stat-card"><span>Mortalité</span><strong id="dashboard-mortality">—</strong></article>
@@ -59,6 +63,12 @@
             <article class="stat-card"><span>Dernière pesée</span><strong id="dashboard-weight">—</strong></article>
           </div>
           <p id="overdue-reminders" class="subtle"></p>
+
+          <article class="card weekly-summary" aria-labelledby="weekly-summary-title">
+            <h4 id="weekly-summary-title">Résumé de la semaine</h4>
+            <p id="weekly-summary-source" class="summary-source">Résumé automatique</p>
+            <p id="weekly-summary-text">Chargement du résumé…</p>
+          </article>
 
           <article class="card chart-card">
             <h4>Poids moyen et cible (g)</h4>

@@ -1,0 +1,8 @@
+{
+  "_note": "Ces seuils sont des valeurs indicatives à confirmer avec l'éleveur ou son vétérinaire. Ils peuvent être modifiés sans changer le code.",
+  "daily_mortality_percent": 3,
+  "cumulative_mortality_percent": 10,
+  "weight_below_target_percent": 10,
+  "no_log_days": 3,
+  "overdue_reminders_count": 1
+}

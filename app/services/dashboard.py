@@ -13,12 +13,11 @@ from app.services.stats import (
 )
 
 
-def get_dashboard(connection: sqlite3.Connection, batch_id: int) -> dict[str, object]:
-    """Build all dashboard values for one batch from local SQLite records."""
+def load_batch_records(connection: sqlite3.Connection, batch_id: int) -> dict[str, object]:
+    """Load the local records shared by dashboard, alerts, and weekly summary."""
     batch_row = connection.execute("SELECT * FROM batches WHERE id = ?", (batch_id,)).fetchone()
     if batch_row is None:
         raise BatchNotFoundError("Lot introuvable.")
-    batch = dict(batch_row)
     daily_logs = [
         dict(row)
         for row in connection.execute(
@@ -31,6 +30,28 @@ def get_dashboard(connection: sqlite3.Connection, batch_id: int) -> dict[str, ob
             "SELECT * FROM weigh_ins WHERE batch_id = ? ORDER BY weigh_date, id", (batch_id,)
         ).fetchall()
     ]
+    reminders = [
+        dict(row)
+        for row in connection.execute(
+            "SELECT * FROM reminders WHERE batch_id = ? ORDER BY due_date, id", (batch_id,)
+        ).fetchall()
+    ]
+    return {
+        "batch": dict(batch_row),
+        "daily_logs": daily_logs,
+        "weigh_ins": weigh_ins,
+        "reminders": reminders,
+    }
+
+
+def get_dashboard(connection: sqlite3.Connection, batch_id: int) -> dict[str, object]:
+    """Build all dashboard values for one batch from local SQLite records."""
+    records = load_batch_records(connection, batch_id)
+    batch = records["batch"]
+    daily_logs = records["daily_logs"]
+    weigh_ins = records["weigh_ins"]
+    if not isinstance(batch, dict) or not isinstance(daily_logs, list) or not isinstance(weigh_ins, list):
+        raise TypeError("Les données du lot sont invalides.")
     anchors = load_target_curve()
     feed = feed_series(batch, daily_logs)
     counts = summary_counts(connection, batch_id)
