@@ -77,6 +77,54 @@
           </article>
         </section>
 
+        <section class="card" aria-labelledby="assistant-title">
+          <h3 id="assistant-title">Dis-moi ce qui s'est passé</h3>
+          <form id="assistant-parse-form">
+            <label>Votre message
+              <textarea id="assistant-text" rows="3" required placeholder="Ex. ce matin 2 morts et 4 kg d'aliment"></textarea>
+            </label>
+            <p class="subtle">Vous pouvez utiliser la touche microphone du clavier pour dicter.</p>
+            <button id="assistant-parse-button" type="submit">Comprendre</button>
+            <button id="assistant-cancel-request" class="secondary" type="button" hidden>Annuler l'attente</button>
+            <a class="manual-link" href="#daily-log-title">Saisie manuelle</a>
+            <p id="assistant-message" class="message" role="status"></p>
+          </form>
+
+          <section id="assistant-confirmation" class="assistant-confirmation" hidden aria-labelledby="assistant-confirmation-title">
+            <h4 id="assistant-confirmation-title">J'ai compris :</h4>
+            <p id="assistant-birds-alive" class="subtle"></p>
+            <div id="assistant-unclear" class="unclear" hidden></div>
+            <div id="assistant-existing-log" class="existing-log" hidden></div>
+            <form id="assistant-confirm-form">
+              <label>Date
+                <input id="assistant-log-date" type="date" required>
+              </label>
+              <label>Morts
+                <input id="assistant-dead-count" type="number" min="0" inputmode="numeric">
+              </label>
+              <label>Aliment (kg)
+                <input id="assistant-feed-kg" type="number" min="0" step="0.1" inputmode="decimal">
+              </label>
+              <label>Taille de l'échantillon
+                <input id="assistant-sample-size" type="number" min="1" inputmode="numeric">
+              </label>
+              <label>Poids moyen (g)
+                <input id="assistant-average-weight" type="number" min="1" inputmode="decimal">
+              </label>
+              <label class="wide">Note
+                <textarea id="assistant-note" rows="3" placeholder="Observation facultative"></textarea>
+              </label>
+              <fieldset id="assistant-mode" hidden>
+                <legend>Un journal existe déjà pour cette date</legend>
+                <label><input type="radio" name="assistant-mode" value="add" checked> Ajouter</label>
+                <label><input type="radio" name="assistant-mode" value="replace"> Remplacer</label>
+              </fieldset>
+              <button id="assistant-confirm-button" type="submit">Valider</button>
+              <button id="assistant-cancel-confirmation" class="secondary" type="button">Annuler</button>
+            </form>
+          </section>
+        </section>
+
         <section class="card" aria-labelledby="daily-log-title">
           <h3 id="daily-log-title">Journal du jour</h3>
           <form id="daily-log-form">

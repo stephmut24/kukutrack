@@ -7,8 +7,14 @@ const dailyLogForm = document.querySelector("#daily-log-form");
 const weighInForm = document.querySelector("#weigh-in-form");
 const dailyLogsElement = document.querySelector("#daily-logs");
 const weighInsElement = document.querySelector("#weigh-ins");
+const assistantParseForm = document.querySelector("#assistant-parse-form");
+const assistantConfirmForm = document.querySelector("#assistant-confirm-form");
+const assistantMessageElement = document.querySelector("#assistant-message");
+const assistantConfirmationElement = document.querySelector("#assistant-confirmation");
 let selectedBatchId = null;
 let editingLogId = null;
+let assistantController = null;
+let assistantProposal = null;
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -121,6 +127,135 @@ async function errorMessage(response, fallback) {
     return data.detail?.[0]?.msg || fallback;
   } catch {
     return fallback;
+  }
+}
+
+function setAssistantField(selector, value) {
+  document.querySelector(selector).value = value === null || value === undefined ? "" : value;
+}
+
+function optionalNumber(selector) {
+  const value = document.querySelector(selector).value.trim();
+  return value === "" ? null : Number(value);
+}
+
+function resetAssistantConfirmation() {
+  assistantProposal = null;
+  assistantConfirmationElement.hidden = true;
+  document.querySelector("#assistant-confirm-form").reset();
+  document.querySelector("#assistant-unclear").hidden = true;
+  document.querySelector("#assistant-existing-log").hidden = true;
+  document.querySelector("#assistant-mode").hidden = true;
+}
+
+function showAssistantProposal(data) {
+  assistantProposal = data.proposal;
+  setAssistantField("#assistant-log-date", data.proposal.log_date || today());
+  setAssistantField("#assistant-dead-count", data.proposal.dead_count);
+  setAssistantField("#assistant-feed-kg", data.proposal.feed_kg);
+  setAssistantField("#assistant-sample-size", data.proposal.sample_size);
+  setAssistantField("#assistant-average-weight", data.proposal.average_weight_g);
+  setAssistantField("#assistant-note", data.proposal.note);
+  document.querySelector("#assistant-birds-alive").textContent = `${data.birds_alive} oiseaux vivants à cette date.`;
+
+  const unclearElement = document.querySelector("#assistant-unclear");
+  unclearElement.replaceChildren();
+  if (data.proposal.unclear.length) {
+    const title = document.createElement("strong");
+    title.textContent = "À vérifier :";
+    const list = document.createElement("ul");
+    data.proposal.unclear.forEach((item) => {
+      const listItem = document.createElement("li");
+      listItem.textContent = item;
+      list.append(listItem);
+    });
+    unclearElement.append(title, list);
+    unclearElement.hidden = false;
+  } else {
+    unclearElement.hidden = true;
+  }
+
+  const existingElement = document.querySelector("#assistant-existing-log");
+  const modeElement = document.querySelector("#assistant-mode");
+  if (data.existing_log) {
+    const existing = data.existing_log;
+    existingElement.textContent = `Journal actuel : ${existing.dead_count} morts, ${existing.feed_kg} kg${existing.note ? ` — ${existing.note}` : ""}.`;
+    existingElement.hidden = false;
+    modeElement.hidden = false;
+    document.querySelector("input[name=assistant-mode][value=add]").checked = true;
+  } else {
+    existingElement.hidden = true;
+    modeElement.hidden = true;
+  }
+  assistantConfirmationElement.hidden = false;
+  assistantConfirmationElement.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function parseAssistantText() {
+  if (!selectedBatchId) return;
+  const text = document.querySelector("#assistant-text").value.trim();
+  if (!text) {
+    showMessage(assistantMessageElement, "Écrivez ce qui s'est passé.", true);
+    return;
+  }
+  assistantController = new AbortController();
+  const parseButton = document.querySelector("#assistant-parse-button");
+  const cancelButton = document.querySelector("#assistant-cancel-request");
+  parseButton.disabled = true;
+  cancelButton.hidden = false;
+  showMessage(assistantMessageElement, "J'attends le modèle local…");
+  try {
+    const response = await fetch(`/api/batches/${selectedBatchId}/assistant/parse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+      signal: assistantController.signal,
+    });
+    if (!response.ok) throw new Error(await errorMessage(response, "Analyse impossible."));
+    showAssistantProposal(await response.json());
+    showMessage(assistantMessageElement, "Vérifiez puis validez les informations.");
+  } catch (error) {
+    if (error.name === "AbortError") {
+      showMessage(assistantMessageElement, "Analyse annulée.");
+    } else {
+      showMessage(assistantMessageElement, error.message || "Analyse impossible.", true);
+    }
+  } finally {
+    assistantController = null;
+    parseButton.disabled = false;
+    cancelButton.hidden = true;
+  }
+}
+
+async function confirmAssistantProposal() {
+  if (!selectedBatchId || !assistantProposal) return;
+  const proposal = {
+    log_date: document.querySelector("#assistant-log-date").value || null,
+    dead_count: optionalNumber("#assistant-dead-count"),
+    feed_kg: optionalNumber("#assistant-feed-kg"),
+    sample_size: optionalNumber("#assistant-sample-size"),
+    average_weight_g: optionalNumber("#assistant-average-weight"),
+    note: document.querySelector("#assistant-note").value.trim() || null,
+    unclear: assistantProposal.unclear,
+  };
+  const mode = document.querySelector("input[name=assistant-mode]:checked").value;
+  const confirmButton = document.querySelector("#assistant-confirm-button");
+  confirmButton.disabled = true;
+  try {
+    const response = await fetch(`/api/batches/${selectedBatchId}/assistant/confirm`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ proposal, mode }),
+    });
+    if (!response.ok) throw new Error(await errorMessage(response, "Validation impossible."));
+    resetAssistantConfirmation();
+    document.querySelector("#assistant-text").value = "";
+    await openTracking(selectedBatchId);
+    showMessage(assistantMessageElement, "Saisie enregistrée.");
+  } catch (error) {
+    showMessage(assistantMessageElement, error.message || "Validation impossible.", true);
+  } finally {
+    confirmButton.disabled = false;
   }
 }
 
@@ -379,11 +514,30 @@ weighInForm.addEventListener("submit", async (event) => {
   await openTracking(selectedBatchId);
 });
 
+assistantParseForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await parseAssistantText();
+});
+
+assistantConfirmForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await confirmAssistantProposal();
+});
+
+document.querySelector("#assistant-cancel-request").addEventListener("click", () => {
+  assistantController?.abort();
+});
+document.querySelector("#assistant-cancel-confirmation").addEventListener("click", () => {
+  resetAssistantConfirmation();
+  showMessage(assistantMessageElement, "Proposition annulée.");
+});
 document.querySelector("#cancel-log-edit").addEventListener("click", resetDailyLogForm);
 document.querySelector("#close-tracking").addEventListener("click", () => {
+  assistantController?.abort();
   trackingElement.hidden = true;
   selectedBatchId = null;
   resetDailyLogForm();
+  resetAssistantConfirmation();
 });
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js");

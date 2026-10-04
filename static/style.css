@@ -52,6 +52,15 @@ button:active { background: #1e4c37; }
 .chart-card h4 { margin-top: 0; }
 .chart { width: 100%; height: auto; min-height: 170px; display: block; background: #fbfcfa; border: 1px solid #d6ddd6; border-radius: 8px; }
 .chart-empty { color: #425148; margin: .75rem 0 0; }
+.manual-link { display: inline-block; color: #1d5b42; font-weight: 700; padding: .5rem 0; }
+.assistant-confirmation { margin-top: 1.25rem; padding-top: 1rem; border-top: 2px solid #d6ddd6; }
+.unclear, .existing-log { margin: .75rem 0; padding: .75rem; border-radius: 8px; }
+.unclear { background: #fff4cc; border-left: 4px solid #a66a00; }
+.existing-log { background: #e7f0ff; border-left: 4px solid #1d4ed8; }
+.unclear ul { margin: .5rem 0 0 1.1rem; padding: 0; }
+fieldset { border: 1px solid #a8b3aa; border-radius: 8px; display: grid; gap: .5rem; padding: .75rem; }
+fieldset label { grid-template-columns: 24px 1fr; align-items: center; font-weight: 400; }
+fieldset input { min-height: 24px; width: 24px; }
 
 @media (min-width: 600px) {
   form { grid-template-columns: 1fr 1fr; }

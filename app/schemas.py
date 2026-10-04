@@ -239,3 +239,31 @@ class ParsedEntry(BaseModel):
     @classmethod
     def normalize_unclear(cls, values: list[str]) -> list[str]:
         return [value.strip() for value in values if value.strip()]
+
+
+class AssistantParseRequest(BaseModel):
+    text: str
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        cleaned_value = value.strip()
+        if not cleaned_value:
+            raise ValueError("Écrivez ce qui s'est passé.")
+        return cleaned_value
+
+
+class AssistantParseResponse(BaseModel):
+    proposal: ParsedEntry
+    birds_alive: int
+    existing_log: DailyLogResponse | None
+
+
+class AssistantConfirmRequest(BaseModel):
+    proposal: ParsedEntry
+    mode: Literal["add", "replace"] = "add"
+
+
+class AssistantConfirmResponse(BaseModel):
+    daily_log: DailyLogResponse | None
+    weigh_in: WeighInResponse | None
