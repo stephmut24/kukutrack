@@ -1,6 +1,7 @@
 """Human-confirmed local assistant HTTP endpoints."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 
 from app.routers.batches import DatabaseConnection
 from app.schemas import (
@@ -8,6 +9,7 @@ from app.schemas import (
     AssistantConfirmResponse,
     AssistantParseRequest,
     AssistantParseResponse,
+    TranscriptionResponse,
 )
 from app.services.assistant import AssistantBadOutput, AssistantUnavailable, parse_entry
 from app.services.assistant_confirmation import (
@@ -21,8 +23,30 @@ from app.services.logs import (
     birds_alive,
     current_utc_date,
 )
+from app.services.transcribe import (
+    AudioTooLargeError,
+    TranscriptionError,
+    TranscriptionUnavailable,
+    UnsupportedAudioError,
+    transcribe_audio,
+)
 
 router = APIRouter(tags=["assistant"])
+
+
+@router.post("/api/assistant/transcribe", response_model=TranscriptionResponse)
+async def transcribe_assistant_audio(request: Request) -> dict[str, str]:
+    """Transcribe one local audio upload without writing any farm data."""
+    audio = await request.body()
+    filename = request.headers.get("x-audio-filename", "audio")
+    content_type = request.headers.get("content-type", "")
+    try:
+        text = await run_in_threadpool(transcribe_audio, audio, filename, content_type)
+    except TranscriptionUnavailable as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except (UnsupportedAudioError, AudioTooLargeError, TranscriptionError) as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    return {"text": text}
 
 
 @router.post("/api/batches/{batch_id}/assistant/parse", response_model=AssistantParseResponse)

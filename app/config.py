@@ -14,6 +14,9 @@ OLLAMA_MAX_FEED_KG = float(os.environ.get("OLLAMA_MAX_FEED_KG", "100"))
 OLLAMA_MAX_DEAD_COUNT = int(os.environ.get("OLLAMA_MAX_DEAD_COUNT", "100000"))
 OLLAMA_MAX_SAMPLE_SIZE = int(os.environ.get("OLLAMA_MAX_SAMPLE_SIZE", "100000"))
 OLLAMA_MAX_AVERAGE_WEIGHT_G = float(os.environ.get("OLLAMA_MAX_AVERAGE_WEIGHT_G", "100000"))
+WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "small")
+WHISPER_LANGUAGE = os.environ.get("WHISPER_LANGUAGE", "fr")
+WHISPER_MAX_AUDIO_BYTES = int(os.environ.get("WHISPER_MAX_AUDIO_BYTES", "10485760"))
 
 
 def get_db_path() -> Path:

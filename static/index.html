@@ -98,6 +98,12 @@
               <textarea id="assistant-text" name="text" rows="3" required placeholder="Ex. ce matin 2 morts et 4 kg d'aliment"></textarea>
             </label>
             <p class="subtle">Vous pouvez utiliser la touche microphone du clavier pour dicter.</p>
+            <input id="assistant-audio" type="file" accept="audio/*" capture="user" hidden>
+            <button id="assistant-record-button" class="secondary" type="button">Parler</button>
+            <button id="assistant-upload-button" class="secondary" type="button">Choisir un audio</button>
+            <button id="assistant-stop-recording" class="danger" type="button" hidden>Arrêter l'enregistrement</button>
+            <button id="assistant-cancel-recording" class="secondary" type="button" hidden>Annuler</button>
+            <p id="assistant-audio-hint" class="subtle">Sur ordinateur, choisissez un enregistrement audio. Sur téléphone, ouvrez l'enregistreur.</p>
             <button id="assistant-parse-button" type="submit">Comprendre</button>
             <button id="assistant-cancel-request" class="secondary" type="button" hidden>Annuler l'attente</button>
             <a class="manual-link" href="#daily-log-title">Saisie manuelle</a>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "kukutrack-shell-v2";
+const CACHE_NAME = "kukutrack-shell-v3";
 const SHELL_FILES = ["/", "/index.html", "/style.css", "/app.js", "/manifest.webmanifest", "/icon.svg"];
 
 self.addEventListener("install", (event) => {

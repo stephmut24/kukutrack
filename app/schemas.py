@@ -233,6 +233,10 @@ class SystemStatusResponse(BaseModel):
     assistant: Literal["available", "unavailable"]
 
 
+class TranscriptionResponse(BaseModel):
+    text: str
+
+
 class ParsedEntry(BaseModel):
     """A proposed manual entry extracted locally from free text."""
 

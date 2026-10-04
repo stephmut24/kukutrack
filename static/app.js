@@ -11,6 +11,12 @@ const assistantParseForm = document.querySelector("#assistant-parse-form");
 const assistantConfirmForm = document.querySelector("#assistant-confirm-form");
 const assistantMessageElement = document.querySelector("#assistant-message");
 const assistantConfirmationElement = document.querySelector("#assistant-confirmation");
+const assistantAudioInput = document.querySelector("#assistant-audio");
+const assistantRecordButton = document.querySelector("#assistant-record-button");
+const assistantUploadButton = document.querySelector("#assistant-upload-button");
+const assistantStopRecordingButton = document.querySelector("#assistant-stop-recording");
+const assistantCancelRecordingButton = document.querySelector("#assistant-cancel-recording");
+const assistantAudioHint = document.querySelector("#assistant-audio-hint");
 const connectionBannerElement = document.querySelector("#connection-banner");
 const serverStatusElement = document.querySelector("#server-status");
 const nativeFetch = window.fetch.bind(window);
@@ -18,6 +24,10 @@ let selectedBatchId = null;
 let editingLogId = null;
 let assistantController = null;
 let assistantProposal = null;
+let microphoneRecorder = null;
+let microphoneStream = null;
+let microphoneChunks = [];
+let discardMicrophoneRecording = false;
 
 function setConnectionUnavailable() {
   connectionBannerElement.hidden = false;
@@ -370,6 +380,122 @@ async function parseAssistantText() {
   }
 }
 
+function supportsDirectMicrophoneRecording() {
+  return window.isSecureContext
+    && Boolean(navigator.mediaDevices?.getUserMedia)
+    && typeof MediaRecorder !== "undefined";
+}
+
+function updateMicrophoneControls(recording = false) {
+  assistantRecordButton.hidden = recording;
+  assistantUploadButton.hidden = recording;
+  assistantStopRecordingButton.hidden = !recording;
+  assistantCancelRecordingButton.hidden = !recording;
+  if (recording) return;
+  if (supportsDirectMicrophoneRecording()) {
+    assistantRecordButton.textContent = "Parler";
+    assistantAudioHint.textContent = "Appuyez sur Parler pour autoriser le microphone de cet ordinateur.";
+  } else {
+    assistantRecordButton.textContent = "Parler";
+    assistantAudioHint.textContent = "Le micro direct nécessite HTTPS ou localhost. Choisissez ou enregistrez un fichier audio.";
+  }
+}
+
+function releaseMicrophone() {
+  microphoneStream?.getTracks().forEach((track) => track.stop());
+  microphoneStream = null;
+  microphoneRecorder = null;
+  microphoneChunks = [];
+}
+
+async function transcribeAssistantAudio(audio) {
+  if (!audio) return;
+  assistantRecordButton.disabled = true;
+  assistantUploadButton.disabled = true;
+  showMessage(assistantMessageElement, "Transcription locale en cours…");
+  try {
+    const response = await fetch("/api/assistant/transcribe", {
+      method: "POST",
+      headers: {
+        "Content-Type": audio.type || "application/octet-stream",
+        "X-Audio-Filename": audio.name || "enregistrement.audio",
+      },
+      body: audio,
+    });
+    if (!response.ok) throw new Error(await errorMessage(response, "Transcription impossible."));
+    const result = await response.json();
+    document.querySelector("#assistant-text").value = result.text;
+    saveDraft(assistantParseForm, "assistant");
+    showMessage(assistantMessageElement, "Transcription prête. Relisez puis appuyez sur Comprendre.");
+  } catch (error) {
+    showMessage(assistantMessageElement, error.message || "Transcription impossible.", true);
+  } finally {
+    assistantRecordButton.disabled = false;
+    assistantUploadButton.disabled = false;
+  }
+}
+
+function microphoneFileName(mimeType) {
+  if (mimeType.includes("ogg")) return "enregistrement.ogg";
+  if (mimeType.includes("mp4")) return "enregistrement.m4a";
+  return "enregistrement.webm";
+}
+
+function stopMicrophoneRecording(discard = false) {
+  if (!microphoneRecorder || microphoneRecorder.state === "inactive") return;
+  discardMicrophoneRecording = discard;
+  microphoneRecorder.stop();
+}
+
+async function startMicrophoneRecording() {
+  if (!supportsDirectMicrophoneRecording()) {
+    assistantAudioInput.click();
+    return;
+  }
+  try {
+    microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
+    microphoneRecorder = mimeType
+      ? new MediaRecorder(microphoneStream, { mimeType })
+      : new MediaRecorder(microphoneStream);
+    microphoneChunks = [];
+    discardMicrophoneRecording = false;
+    microphoneRecorder.addEventListener("dataavailable", (event) => {
+      if (event.data.size > 0) microphoneChunks.push(event.data);
+    });
+    microphoneRecorder.addEventListener("stop", () => {
+      const shouldDiscard = discardMicrophoneRecording;
+      const recordingType = microphoneRecorder?.mimeType || "audio/webm";
+      const recording = new Blob(microphoneChunks, { type: recordingType });
+      releaseMicrophone();
+      updateMicrophoneControls();
+      if (shouldDiscard) {
+        showMessage(assistantMessageElement, "Enregistrement annulé.");
+        return;
+      }
+      const audio = new File([recording], microphoneFileName(recordingType), { type: recordingType });
+      void transcribeAssistantAudio(audio);
+    });
+    microphoneRecorder.start();
+    updateMicrophoneControls(true);
+    showMessage(assistantMessageElement, "Enregistrement en cours. Appuyez sur Arrêter quand vous avez fini.");
+  } catch (error) {
+    releaseMicrophone();
+    updateMicrophoneControls();
+    const message = error.name === "NotAllowedError"
+      ? "L'accès au microphone a été refusé. Choisissez un audio ou autorisez le micro dans le navigateur."
+      : "Le microphone est indisponible. Choisissez un fichier audio.";
+    showMessage(assistantMessageElement, message, true);
+  }
+}
+
+async function transcribeSelectedAudio() {
+  const audio = assistantAudioInput.files?.[0];
+  if (!audio) return;
+  await transcribeAssistantAudio(audio);
+  assistantAudioInput.value = "";
+}
+
 async function confirmAssistantProposal() {
   if (!selectedBatchId || !assistantProposal) return;
   const proposal = {
@@ -701,10 +827,16 @@ document.querySelector("#assistant-cancel-confirmation").addEventListener("click
   resetAssistantConfirmation();
   showMessage(assistantMessageElement, "Proposition annulée.");
 });
+assistantRecordButton.addEventListener("click", () => { void startMicrophoneRecording(); });
+assistantUploadButton.addEventListener("click", () => assistantAudioInput.click());
+assistantStopRecordingButton.addEventListener("click", () => stopMicrophoneRecording());
+assistantCancelRecordingButton.addEventListener("click", () => stopMicrophoneRecording(true));
+assistantAudioInput.addEventListener("change", () => { void transcribeSelectedAudio(); });
 document.querySelector("#cancel-log-edit").addEventListener("click", resetDailyLogForm);
 document.querySelector("#close-tracking").addEventListener("click", () => {
   saveTrackingDrafts();
   assistantController?.abort();
+  stopMicrophoneRecording(true);
   trackingElement.hidden = true;
   selectedBatchId = null;
   resetDailyLogForm();
@@ -721,6 +853,10 @@ form.addEventListener("input", () => saveDraft(form, "batch"));
 });
 window.addEventListener("offline", setConnectionUnavailable);
 window.addEventListener("online", () => { void checkServerStatus(); });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopMicrophoneRecording(true);
+});
 window.setInterval(() => { void checkServerStatus(); }, 30000);
+updateMicrophoneControls();
 void checkServerStatus();
 loadBatches();
